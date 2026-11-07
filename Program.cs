@@ -11,7 +11,7 @@ Directory.CreateDirectory(salesTotalDir);
 var salesFiles = FindFiles(storesDirectory);
 
 var salesTotal = CalculateSalesTotal(salesFiles);
-var salesSummary = GenerateTotalSalesReport(salesFiles);
+
 
 File.AppendAllText(Path.Combine(salesTotalDir, "totals.txt"), $"{salesTotal}{Environment.NewLine}");
 
@@ -55,7 +55,7 @@ double CalculateSalesTotal(IEnumerable<string> salesFiles)
 
 static void GenerateTotalSalesReport(IEnumerable<string> salesFiles)
 {
-    
+
     double total = 0;
     StringBuilder builder = new StringBuilder();
 
@@ -75,6 +75,8 @@ static void GenerateTotalSalesReport(IEnumerable<string> salesFiles)
     }
 
     builder.Insert(0, $"Total: {total:c}\n");
+    string reportPath = "totals.txt";
+    File.WriteAllText(reportPath, builder.ToString());
 }
 
 record SalesData(double Total);
