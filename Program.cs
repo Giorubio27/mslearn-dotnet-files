@@ -12,6 +12,9 @@ var salesFiles = FindFiles(storesDirectory);
 
 var salesTotal = CalculateSalesTotal(salesFiles);
 
+GenerateTotalSalesReport(salesFiles, salesTotalDir);
+
+
 
 File.AppendAllText(Path.Combine(salesTotalDir, "totals.txt"), $"{salesTotal}{Environment.NewLine}");
 
@@ -53,7 +56,7 @@ double CalculateSalesTotal(IEnumerable<string> salesFiles)
     return salesTotal;
 }
 
-static void GenerateTotalSalesReport(IEnumerable<string> salesFiles)
+static void GenerateTotalSalesReport(IEnumerable<string> salesFiles, string outputDir)
 {
 
     double total = 0;
@@ -62,21 +65,31 @@ static void GenerateTotalSalesReport(IEnumerable<string> salesFiles)
     builder.AppendLine("Total Sales Summary");
     builder.Append("-----------------");
 
+    StringBuilder detailsBuilder = new StringBuilder();
+    detailsBuilder.AppendLine("Details: ");
+
     foreach (string file in salesFiles)
     {
         string totals = File.ReadAllText(file);
 
         SalesData? sdata = JsonConvert.DeserializeObject<SalesData?>(totals);
-        total += sdata?.Total ?? 0;
+        double fileTotal = sdata?.Total ?? 0;
 
-        builder.AppendLine($"{Path.GetFileName(file)},{sdata:c}");
+        total += fileTotal;
+
+        detailsBuilder.AppendLine($"{Path.GetFileName(file)},{fileTotal:c}");
 
 
     }
 
-    builder.Insert(0, $"Total: {total:c}\n");
-    string reportPath = "totals.txt";
+    builder.AppendLine($"Total Sales: {total:c}");
+    builder.AppendLine();
+    builder.Append(detailsBuilder.ToString());
+
+    string reportPath = Path.Combine(outputDir, "salesSummary.txt");
     File.WriteAllText(reportPath, builder.ToString());
 }
+
+
 
 record SalesData(double Total);
